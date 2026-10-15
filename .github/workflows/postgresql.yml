@@ -1,0 +1,49 @@
+name: PostgreSQL integration
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: miseops
+          POSTGRES_USER: miseops
+          POSTGRES_PASSWORD: ci-disposable-database-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U miseops"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGDATABASE: miseops
+      PGUSER: miseops
+      PGPASSWORD: ci-disposable-database-only
+      PGHOST: localhost
+      PGPORT: 5432
+      DJANGO_SECRET_KEY: ci-only-not-a-production-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Check model migrations
+        run: python backend/manage.py makemigrations --check --dry-run
+      - name: Apply PostgreSQL migrations
+        run: python backend/manage.py migrate --noinput
+      - name: Run API and PostgreSQL transaction tests
+        run: python backend/manage.py test operations --verbosity 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci && npm run build
+        working-directory: frontend
