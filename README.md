@@ -74,6 +74,6 @@ python backend/manage.py test operations
 cd frontend && npm ci && npm run build
 ```
 
-The four backend tests cover access control, invalid quantities, transition rejection, audit history and formula-safe CSV. They passed with the isolated SQLite test override (`TEST_SQLITE=1`). The PostgreSQL integration workflow in `.github/workflows/postgresql.yml` starts PostgreSQL 17, applies migrations and runs the API suite plus PostgreSQL-specific tests for persistence, constraints and concurrent transitions. The CI check result records whether that integration has passed. A local PostgreSQL service is not available in the build container.
+The PostgreSQL integration workflow in `.github/workflows/postgresql.yml` starts PostgreSQL 17, applies migrations and runs the API suite plus PostgreSQL-specific tests for persistence, constraints and concurrent transitions. [The integration run passed](https://github.com/Ankitlunawat/MiseOps/actions/runs/38775211791), including migrations, the backend test suite and the React production build. API tests also cover access control, invalid quantities, transition rejection, audit history and formula-safe CSV.
 
 Before production: use a secret from your environment, HTTPS, a production WSGI/ASGI server, backup policies, rate limiting and monitored logs. The development server is for local use.
