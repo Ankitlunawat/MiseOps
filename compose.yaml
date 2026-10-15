@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: miseops
+      POSTGRES_USER: miseops
+      POSTGRES_PASSWORD: ${PGPASSWORD:?Set PGPASSWORD before starting}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - miseops_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U miseops"]
+      interval: 5s
+      retries: 10
+volumes:
+  miseops_data:
